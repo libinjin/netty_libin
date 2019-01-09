@@ -14,7 +14,6 @@ import org.apache.thrift.transport.TTransportException;
 public class BootStrap {
     public static void main(String[] args) {
         try {
-
             //启动ServerSocket
             TNonblockingServerSocket socket = new TNonblockingServerSocket(8899);
            //高可用一个Server,arg是用来构建好一系列的信息
