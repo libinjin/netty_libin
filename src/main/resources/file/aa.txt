@@ -1,1 +1,427 @@
-年后的很多很多的con
+package com.youguu.web.simtrade.action;
+
+import com.alibaba.fastjson.JSONObject;
+import com.youguu.common.web.protocal.ProtocalStatusCode;
+import com.youguu.core.JSONHelper;
+import com.youguu.core.logging.Log;
+import com.youguu.core.logging.LogFactory;
+import com.youguu.simtrade.rpcservice.client.TradeRpcService;
+import com.youguu.simtrade.rpcservice.client.TradeRpcServiceFactory;
+import com.youguu.simtrade.rpcservice.common.exception.BusinessException;
+import com.youguu.simtrade.rpcservice.common.pojo.AssertProfit;
+import com.youguu.simtrade.rpcservice.common.pojo.ClosedPosition;
+import com.youguu.simtrade.rpcservice.common.pojo.ClosedQuery;
+import com.youguu.simtrade.rpcservice.common.pojo.Conclude;
+import com.youguu.simtrade.rpcservice.common.pojo.ConcludeDetail;
+import com.youguu.simtrade.rpcservice.common.pojo.ConcludeIndu;
+import com.youguu.simtrade.rpcservice.common.pojo.DailyAssetStat;
+import com.youguu.simtrade.rpcservice.common.pojo.NewProfitLine;
+import com.youguu.web.simtrade.pojo.ProfitDate;
+import com.youguu.web.simtrade.util.Util;
+import org.springframework.stereotype.Controller;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+/**
+ *
+ * @ClassName: AssetAction
+ * @Description: 资产分析
+ * @author libin
+ * @date 2018年12月13日
+ *
+ */
+@Path(value = "assetanalysis")
+@Controller("assetanalysis")
+public class AssetAnalysisAction {
+    private static Log log = LogFactory.getLog("rank");
+
+    private static TradeRpcService rankService = TradeRpcServiceFactory.getTradeRpcService();
+
+    /**
+     * 交易盈亏统计
+     */
+    @GET
+    @Path(value = "/hisprofit/query")
+    @Produces("application/json;charset=UTF-8")
+    public String profitAndTradeQuery(
+            @QueryParam("userid") int userId,
+            @QueryParam("matchid") int matchId,
+            @QueryParam("startTime") String startTime,
+            @QueryParam("endTime") String endTime) {
+
+        try{
+            if(startTime==null||"".equals(startTime)||endTime==null||"".equals(endTime)){
+                return  JSONHelper.returnJSON("0111", ProtocalStatusCode.getMsg("0111"));
+            }
+            AssertProfit assertProfit = TradeRpcServiceFactory.getTradeRpcService().getAssetProfitLine(userId, matchId, startTime, endTime);
+            ConcludeDetail concludeDetail = TradeRpcServiceFactory.getTradeRpcService().getHisConcludeList(userId,matchId,startTime,endTime);
+
+            int flag = -2;
+            if("2018-01-01 00:00:00".equals(startTime) && "2018-12-31 23:59:59".equals(endTime)){//查全年时
+                flag = getProfitFlag(assertProfit, concludeDetail);
+            }
+            JSONObject json = new JSONObject();
+            Util.returnJsonForAsset(assertProfit,concludeDetail, flag, json);
+            return JSONHelper.returnJSON("0000", ProtocalStatusCode.getMsg("0000"), json);
+        }catch (BusinessException e) {
+            return JSONHelper.returnJSON("0201", e.getMessage());
+        } catch (Exception e) {
+            log.error(e);
+            return  JSONHelper.returnJSON("1001", ProtocalStatusCode.getMsg("1001"));
+        }
+
+    }
+
+    @GET
+    @Path(value = "/closed/query")
+    @Produces("application/json;charset=UTF-8")
+    public String closedPositionQuery(
+            @QueryParam("userid") int userId,
+            @QueryParam("matchid") int matchId,
+            @QueryParam("startTime") String startTime,
+            @QueryParam("endTime") String endTime){
+
+        try{
+            if(startTime==null||"".equals(startTime)||endTime==null||"".equals(endTime)){
+                return  JSONHelper.returnJSON("0111", ProtocalStatusCode.getMsg("0111"));
+            }
+            ClosedQuery closedQuery = TradeRpcServiceFactory.getTradeRpcService().getHisClosedPosition(userId,matchId,startTime,endTime);
+
+            int flag = -2;
+            if("2018-01-01 00:00:00".equals(startTime) && "2018-12-31 23:59:59".equals(endTime)){//查全年时
+                flag = getClosedFlag(closedQuery);
+            }
+            JSONObject json = new JSONObject();
+            Util.returnJsonForClosed(closedQuery, flag, json);
+            return JSONHelper.returnJSON("0000", ProtocalStatusCode.getMsg("0000"), json);
+        }catch (BusinessException e) {
+            return JSONHelper.returnJSON("0201", e.getMessage());
+        } catch (Exception e) {
+            log.error(e);
+            return  JSONHelper.returnJSON("1001", ProtocalStatusCode.getMsg("1001"));
+        }
+    }
+
+    @GET
+    @Path(value = "/indutry/query")
+    @Produces("application/json;charset=UTF-8")
+    public String getIndustryRation(
+            @QueryParam("userid") int userId,
+            @QueryParam("matchid") int matchId,
+            @QueryParam("startTime") String startTime,
+            @QueryParam("endTime") String endTime ){
+
+        try{
+            if(startTime==null||"".equals(startTime)||endTime==null||"".equals(endTime)){
+                return  JSONHelper.returnJSON("0111", ProtocalStatusCode.getMsg("0111"));
+            }
+            ConcludeIndu concludeIndu = TradeRpcServiceFactory.getTradeRpcService().getConcludeIndu(userId,matchId,startTime,endTime);
+            JSONObject json = new JSONObject();
+            Util.returnJsonForIndustry(concludeIndu, json);
+            return JSONHelper.returnJSON("0000", ProtocalStatusCode.getMsg("0000"), json);
+        }catch (BusinessException e) {
+            return JSONHelper.returnJSON("0201", e.getMessage());
+        } catch (Exception e) {
+            log.error(e);
+            return  JSONHelper.returnJSON("1001", ProtocalStatusCode.getMsg("1001"));
+        }
+    }
+
+    @GET
+    @Path(value = "/closedlist/query")
+    @Produces("application/json;charset=UTF-8")
+    public String closedPositionList(
+            @QueryParam("userid") int userId,
+            @QueryParam("matchid") int matchId,
+            @QueryParam("startTime") String startTime,
+            @QueryParam("endTime") String endTime){
+
+        try {
+            if(startTime==null||"".equals(startTime)||endTime==null||"".equals(endTime)){
+                return  JSONHelper.returnJSON("0111", ProtocalStatusCode.getMsg("0111"));
+            }
+            List<ClosedPosition> closedPositionList = TradeRpcServiceFactory.getTradeRpcService().getHisClosedList(userId,matchId,startTime,endTime);
+            return JSONHelper.returnJSON(closedPositionList,"yyyy-MM-dd", "0.00");
+        } catch(Exception e) {
+            log.error(e);
+            return JSONHelper.returnJSON("1001", ProtocalStatusCode.getMsg("1001"));
+        }
+    }
+
+    @GET
+    @Path(value = "/date/query")
+    @Produces("application/json;charset=UTF-8")
+    public String historyDateQuery(
+            @QueryParam("userid") int userId,
+            @QueryParam("matchid") int matchId){
+
+        try{
+            ProfitDate profitDate = new ProfitDate();
+            JSONObject json = new JSONObject();
+            List<DailyAssetStat> dailyAssetList = TradeRpcServiceFactory.getTradeRpcService().getLastAndFirstAssetStat(userId,matchId);
+            if(dailyAssetList==null||dailyAssetList.size()!=2){
+                profitDate.setFlag(1);
+                Util.returnJsonForDate(profitDate,json);
+                return JSONHelper.returnJSON("0000", ProtocalStatusCode.getMsg("0000"), json);
+            }
+            Date lastDay = dailyAssetList.get(0).getStatDate();
+            Date firstDay = dailyAssetList.get(1).getStatDate();
+            ArrayList<Map<String,String>> list = new ArrayList();
+            SimpleDateFormat format2 = new SimpleDateFormat("yyyy-MM-dd");
+            String lastDateStr = format2.format(lastDay);
+            String firstDateStr = format2.format(firstDay);
+            int lastYear = Integer.parseInt(lastDateStr.split("-")[0]);
+            int lastMonth = Integer.parseInt(lastDateStr.split("-")[1]);
+            int firstYear = Integer.parseInt(firstDateStr.split("-")[0]);
+            Calendar c1 = Calendar.getInstance();
+            Calendar c2 = Calendar.getInstance();
+            c1.setTime(lastDay);
+            c2.setTime(firstDay);
+            int mutilMonth = c1.get(Calendar.MONTH)-c2.get(Calendar.MONTH) + (c1.get(Calendar.YEAR) - c2.get(Calendar.YEAR))*12+1;
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:ss:mm");
+            if(firstYear<=2018 && lastYear>=2018){
+                Map map_year = new HashMap();
+                map_year.put("startTime", "2018-01-01 00:00:00");
+                map_year.put("endTime", "2018-12-31 23:59:59");
+                map_year.put("lable", "2018年");
+                map_year.put("shareYear","2018");
+                map_year.put("shareTitle","年度模拟交易分析报告");
+                list.add(map_year);
+            }
+            int size = mutilMonth <12 ? mutilMonth:12;
+            for(int i=0;i<size;i++){
+
+                Map<String,String> map = new HashMap<String, String>();
+                Calendar cale = Calendar.getInstance();
+                cale.set(lastYear, lastMonth - 1, 1);
+                cale.add(Calendar.MONTH, -i);
+                cale.set(Calendar.DAY_OF_MONTH, 1);
+                cale.set(Calendar.HOUR_OF_DAY, 0);
+                cale.set(Calendar.MINUTE, 0);
+                cale.set(Calendar.SECOND, 0);
+                String firstday = format.format(cale.getTime());
+                cale.set(Calendar.DAY_OF_MONTH, cale.getActualMaximum(Calendar.DAY_OF_MONTH));
+                cale.set(Calendar.HOUR_OF_DAY, 23);
+                cale.set(Calendar.MINUTE, 59);
+                cale.set(Calendar.SECOND, 59);
+                String lastday = format.format(cale.getTime());
+
+                int year = cale.get(Calendar.YEAR);
+                int month = cale.get(Calendar.MONTH) + 1;
+                map.put("lable", year+"年"+month+"月");
+                map.put("startTime", firstday);
+                map.put("endTime", lastday);
+                map.put("shareYear",year+"");
+                map.put("shareTitle",month+"月模拟交易分析报告");
+                list.add(map);
+            }
+            profitDate.setFlag(0);
+            profitDate.setList(list);
+            Util.returnJsonForDate(profitDate,json);
+            return JSONHelper.returnJSON("0000", ProtocalStatusCode.getMsg("0000"), json);
+        }catch (BusinessException e) {
+            return JSONHelper.returnJSON("0201", e.getMessage());
+        } catch (Exception e) {
+            log.error(e);
+            return  JSONHelper.returnJSON("1001", ProtocalStatusCode.getMsg("1001"));
+        }
+    }
+
+    public int getProfitFlag(AssertProfit assertProfit,ConcludeDetail concludeDetail) throws ParseException {
+        int flag = -1;
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        List<Integer> list = new ArrayList<>();
+        Map<Integer, Map<String,String>> map = putStockMap();
+        List<Conclude> concludeList = concludeDetail.getTradList();
+        List<NewProfitLine> profitLineList = assertProfit.getNewProfitLines();
+        //1:buy,2:sale
+        if(concludeList!=null && concludeList.size()>0){
+            for (Conclude conclude : concludeList ) {
+                if (conclude.getType() == 1 ) {
+                    Date date = conclude.getConcludeTime();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    int month = calendar.get(Calendar.MONTH) + 1; //得到交易月份
+                    String stockCode = conclude.getStockCode();
+                    boolean exist = map.get(month).containsKey(stockCode);
+                    //8、2018年 在特定月份买入牛股
+                    if (exist){
+                        list.add(8);
+                        break;
+                    }
+                }
+            }
+        }
+
+        long firstDay = format.parse("20180101").getTime();
+        long sixDay = format.parse("20180630").getTime();
+        long tenFirstDay = format.parse("20181001").getTime();
+        long tenLastDay = format.parse("20181031").getTime();
+        long elevLastDay = format.parse("20181130").getTime();
+        long tweLastDay = format.parse("20181231").getTime();
+        float halfProfitRation = 1.0f;
+        float tenProfitRation = 1.0f;
+        float elevenProfitRation = 1.0f;
+        float twelveProfitRation = 1.0f;
+        if(profitLineList!=null && profitLineList.size()>0){
+            for (NewProfitLine line : profitLineList) {
+                String date = line.getStatDate();
+                long tradDay = format.parse(date).getTime();
+                float profitRation = Float.parseFloat(line.getMyProfit());
+                if(firstDay <= tradDay && tradDay <= sixDay){
+                    halfProfitRation *= (1+profitRation);
+                }
+                if(tenFirstDay <= tradDay && tradDay <= tenLastDay){
+                    tenProfitRation *= (1+profitRation);
+                }
+                if(tenFirstDay <= tradDay && tradDay <= elevLastDay){
+                    elevenProfitRation *= (1+profitRation);
+                }
+                if(tenFirstDay <= tradDay && tradDay <= tweLastDay){
+                    twelveProfitRation *= (1+profitRation);
+                }
+            }
+        }
+        int tradeSize = concludeDetail.getTradeSize();//交易数
+        float profit = assertProfit.getProfit();//期间总收益
+        float profitRation = 0.0f;
+        String totalProfitRation = assertProfit.getProfitRation();
+        if(totalProfitRation!=null){
+            profitRation = Float.parseFloat(totalProfitRation);
+        }
+        //1、2018年股票交易次数为1
+        if(tradeSize==1){
+            list.add(1);
+        }
+        //2、2018年股票交易次数为0
+        if(tradeSize==0){
+            list.add(2);
+        }
+        //3、2018年总收益大于0，且前半年总收益<0
+        if(profit>0 && halfProfitRation<1){
+            list.add(3);
+        }
+        //4、2018年总收益率小于 -20%
+        if(profitRation<-0.2){
+            list.add(4);
+        }
+        //5、2018年底总资产在50万以上
+        float totalAsset = assertProfit.getTotalAsset();
+        if(totalAsset>5000000f){
+            list.add(5);
+        }
+        //7、2018年 12月收益 >11月收益>10月收益
+        if(twelveProfitRation>elevenProfitRation && elevenProfitRation>tenProfitRation){
+            list.add(7);
+        }
+        int num = list.size();
+        if(num>0){
+            int i =new Random().nextInt(num);
+            flag = list.get(i);
+        }
+        return flag;
+    }
+
+    public int getClosedFlag(ClosedQuery closedQuery) {
+        int flag = -1;
+        String positiveRation = closedQuery.getPostiveRation();
+        double rate = 0.0;
+        if(positiveRation!=null){
+             rate = Double.parseDouble(positiveRation);
+        }
+        //6、2018年成功率为1
+        if(rate==1){
+            flag = 6;
+        }
+        return flag;
+    }
+
+    public Map<Integer,Map<String,String>> putStockMap(){
+        Map<Integer,Map<String,String>> map = new HashMap();
+        Map map1 = new HashMap<String,String>();
+        map1.put("300487","蓝晓科技");
+        map1.put("000732","泰禾集团");
+        map1.put("300107","建新股份");
+        map.put(1,map1);
+
+        Map map2 = new HashMap<String,String>();
+        map2.put("300586","美联新材");
+        map2.put("600588","用友网络");
+        map2.put("600810","神马股份");
+        map.put(2,map2);
+
+        Map map3 = new HashMap<String,String>();
+        map3.put("300624","万兴科技");
+        map3.put("002877","智能自控");
+        map3.put("002208","合肥城建");
+        map.put(3,map3);
+
+        Map map4 = new HashMap<String,String>();
+        map4.put("002806","华锋股份");
+        map4.put("600536","中国软件");
+        map.put(4,map4);
+
+        Map map5 = new HashMap<String,String>();
+        map5.put("002930","宏川智慧");
+        map5.put("002607","亚夏汽车");
+        map5.put("000735","罗牛山");
+        map.put(5,map5);
+
+        Map map6 = new HashMap<String,String>();
+        map6.put("300647","超频三");
+        map6.put("300345","红宇新材");
+        map6.put("300139","晓程科技");
+        map.put(6,map6);
+
+        Map map7 = new HashMap<String,String>();
+        map7.put("000760","斯太尔");
+        map7.put("002618","丹邦科技");
+        map7.put("002628","成都路桥");
+        map7.put("002243","通产丽星");
+        map.put(7,map7);
+
+        Map map8 = new HashMap<String,String>();
+        map8.put("002755","东方新星");
+        map8.put("002463","沪电股份");
+        map8.put("603032","德新交运");
+        map.put(8,map8);
+
+        Map map9 = new HashMap<String,String>();
+        map9.put("300023","宝德股份");
+        map9.put("600629","攀钢钒钛");
+        map.put(9,map9);
+
+        Map map10 = new HashMap<String,String>();
+        map10.put("000622","恒立实业");
+        map10.put("000750","国海证券");
+        map.put(10,map10);
+
+        Map map11 = new HashMap<String,String>();
+        map11.put("600604","市北高新");
+        map11.put("002708","光洋股份");
+        map11.put("002575","群兴玩具");
+        map11.put("600783","鲁信创投");
+        map11.put("002288","超华科技");
+
+        map.put(11,map11);
+
+        Map map12 = new HashMap<String,String>();
+        map12.put("002243","通产丽星");
+        map12.put("600776","东方通信");
+        map12.put("002927","泰永长征");
+        map.put(12,map12);
+        return map;
+    }
+}
+

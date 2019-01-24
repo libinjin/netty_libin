@@ -19,6 +19,7 @@ public class MyServer {
                 .childHandler(new MyInitializer());
         try {
             ChannelFuture channelFuture = serverBootstrap.bind(8819).sync();
+            System.out.println("启动服务端，端口号："+8819);
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
