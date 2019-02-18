@@ -60,13 +60,16 @@ public class NioServer {
                          * 之前注册的是什么对象，强转的就是什么对象
                          */
                         client = (SocketChannel) selectionKey.channel();
-                        ByteBuffer readBuffer = ByteBuffer.allocate(512);
-                        int count = client.read(readBuffer);
-                        if (count<=0) break;
-                        readBuffer.flip();
-                        //字符解码为UTF-8格式
-                        Charset charset = Charset.forName("UTF-8");
-                        String receivedMessage = String.valueOf(charset.decode(readBuffer).array());
+                        String receivedMessage = "";
+                        while(true){
+                            ByteBuffer readBuffer = ByteBuffer.allocate(512);
+                            int count = client.read(readBuffer);
+                            if (count<=0) break;
+                            readBuffer.flip();
+                            //字符解码为UTF-8格式
+                            Charset charset = Charset.forName("UTF-8");
+                            receivedMessage = String.valueOf(charset.decode(readBuffer).array());
+                        }
                         String sendKey = "";
                         for (Map.Entry<String,SocketChannel> entry : clientMap.entrySet()) {
                             if (client == entry.getValue()) {

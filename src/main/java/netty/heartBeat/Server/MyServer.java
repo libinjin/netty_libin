@@ -15,7 +15,7 @@ public class MyServer {
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup,workerGroup).channel(NioServerSocketChannel.class)
-                .handler(new LoggingHandler(LogLevel.INFO))
+                .handler(new LoggingHandler(LogLevel.INFO))//handler专门用于处理bossGroup
                 .childHandler(new MyInitializer());
         try {
             ChannelFuture channelFuture = serverBootstrap.bind(8819).sync();

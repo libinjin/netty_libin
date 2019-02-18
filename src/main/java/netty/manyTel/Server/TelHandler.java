@@ -31,18 +31,26 @@ public class TelHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        channelGroup.writeAndFlush("客户端："+channel.remoteAddress()+"加入\n");
+        //channelGroup.writeAndFlush("客户端："+channel.remoteAddress()+"加入\n");
         //实现一个广播告诉其他客户端，服务端要保存所有已经建立好的连接
-        channelGroup.add(channel);
+        channelGroup.add(channel);//
+        System.out.println("客户端："+channel.remoteAddress()+"加入");
+    }
+
+    @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+         Channel channel = ctx.channel();
+        System.out.println(channel.remoteAddress()+"注册进来");
     }
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        channelGroup.writeAndFlush("服务器-"+channel.remoteAddress()+"离开\n");
-        System.out.println(channelGroup.size());
+        //channelGroup.writeAndFlush("客户端-"+channel.remoteAddress()+"离开\n");
+        //System.out.println(channelGroup.size());
+        System.out.println("客户端-"+channel.remoteAddress()+"离开");
     }
-
+    //监听客户端连接
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
@@ -51,7 +59,8 @@ public class TelHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        channelGroup.writeAndFlush("服务器-"+channel.remoteAddress()+"下线");
+        /*channelGroup.writeAndFlush("服务器-"+channel.remoteAddress()+"下线");*/
+        System.out.println(channel.remoteAddress()+"下线");
     }
 
     @Override

@@ -7,6 +7,8 @@ import io.netty.handler.timeout.IdleStateEvent;
 import java.net.SocketAddress;
 
 public class MyServerHandler extends ChannelInboundHandlerAdapter {
+
+    //处理读写空闲事件的处理
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 

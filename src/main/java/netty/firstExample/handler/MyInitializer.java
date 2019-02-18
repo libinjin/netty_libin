@@ -1,6 +1,5 @@
 package netty.firstExample.handler;
 
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -9,9 +8,10 @@ import io.netty.handler.codec.http.HttpServerCodec;
 /**
  * 自己接到请求后，
  * 做处理请求的处理器
- * 需要继承ChannelInitializer<SocketChannel>
+ * 需要继承ChannelInitializer<SocketChannel>通道初始化器
+ *
  */
-public class MyServerHandler extends ChannelInitializer<SocketChannel> {
+public class MyInitializer extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {

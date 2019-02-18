@@ -10,6 +10,9 @@ public class MyClient {
     public static void main(String[] args) {
         /**
          * 连接服务端
+         * 客户端事件循环组只需要一个
+         * 这里只需要连接并发送消息即可，
+         * 所以只需要一个eventLoopGroup
          */
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         Bootstrap bootstrap  = new Bootstrap();

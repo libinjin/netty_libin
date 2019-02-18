@@ -64,6 +64,7 @@ public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
         super.channelRegistered(ctx);
     }
 
+    //当建立好连接后，handlerAdded事件发生，可以把连接对象保存起来，连接是一个channel对象
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         System.out.println("handler added的回调");
