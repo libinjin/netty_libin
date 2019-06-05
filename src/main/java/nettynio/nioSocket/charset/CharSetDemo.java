@@ -10,7 +10,6 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
-import java.util.SortedMap;
 
 /**
  * 字符集编解码
@@ -29,9 +28,9 @@ public class CharSetDemo {
 
         //内存映射文件，直接可以修改堆外内存
         MappedByteBuffer inputData = inputFileChannel.map(FileChannel.MapMode.READ_ONLY,0,length);
-        //得到系统所有的字符集
+      /*  //得到系统所有的字符集
         SortedMap<String,Charset> sortedMap = Charset.availableCharsets();
-
+*/
         /**
          * Charset.forName("iso-8859-1");
          * 为什么用iso-8859-1也可以进行正确的中文编码
@@ -52,7 +51,7 @@ public class CharSetDemo {
         //再将charBuffer以utf-8的形式编程，最后写入到outputFileChannel中
         //ByteBuffer outputData = encoder.encode(charBuffer);
         //这时会乱码
-        ByteBuffer outputData = Charset.forName("iso-8859-1").encode(charBuffer);
+        ByteBuffer outputData = Charset.forName("utf-8").encode(charBuffer);
         outputFileChannel.write(outputData);
 
         inputRandomAccessFile.close();

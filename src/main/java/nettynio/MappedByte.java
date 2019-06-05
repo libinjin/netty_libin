@@ -1,11 +1,10 @@
 package nettynio;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.RandomAccess;
 
 /**
  * 内存映射文件
@@ -21,5 +20,7 @@ public class MappedByte {
         mappedByteBuffer.put(1,(byte) 'b');
         mappedByteBuffer.put(2,(byte) 'c');
         accessFile.close();
+
+        ByteBuffer.allocate(9);
     }
 }

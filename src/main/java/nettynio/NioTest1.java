@@ -15,7 +15,7 @@ public class NioTest1 {
         for (int i = 0; i <5; i++) {
             int randomNum = new SecureRandom().nextInt(20);
             //向buffer中写入数据
-            buffer.put(randomNum);
+            buffer.put(i);
         }
         System.out.println("buffer的limit："+buffer.limit());
         //反转后，从buffer中读取数据

@@ -13,12 +13,14 @@ public class DirectBuffer {
 
         FileChannel inputchannel = fis.getChannel();
         FileChannel outputChannel = fos.getChannel();
+
+        //直接缓冲区分配，分配系统内存，在JVM内存之外
         ByteBuffer buffer = ByteBuffer.allocateDirect(512);
 
         while(true){
             buffer.clear();
             int read = inputchannel.read(buffer);
-            System.out.println("read"+read);
+            System.out.println("read:"+read);
             if(-1 == read){
                 break;
             }
