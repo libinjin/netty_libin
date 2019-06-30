@@ -1,0 +1,92 @@
+# coding=utf-8
+
+from util import db_util
+import time
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
+
+asteroid_query = db_util.get_asteroid_query()
+today = time.strftime("%Y%m%d")
+
+from datetime import timedelta, datetime
+yesterday = datetime.today() + timedelta(-1)
+yesterday_format = yesterday.strftime('%Y%m%d')
+
+#1.统计前一天成功分享的次数和用户数
+def get_shared():
+    status=1
+    sql =  """
+        select count(id) as shareCounter,count(user_id)as userIdCounter 
+        from asteroid.share
+        where status = '%s'
+        and last_share_time >= '%s' and last_share_time < '%s'
+        """ % (status, yesterday_format, today)
+    asteroid_query.Query(sql)
+    for row in asteroid_query.record:
+        return "成功分享的次数:%s" % row["shareCounter"]
+
+#1.统计前一天成功分享的次数和用户数
+def get_share_users():
+    result=""
+    status = 1
+    sql= """
+         select count(id) as shareCounter,count(user_id)as userIdCounter 
+         from asteroid.share where status ='%s' 
+         and last_share_time >= '%s' and last_share_time < '%s'
+        """ % (status, yesterday_format, today)
+    asteroid_query.Query(sql)
+    for row in asteroid_query.record:
+        result = "成功分享的次数:%s,用户数:%s," % (row["shareCounter"], row["userIdCounter"])
+    return result
+
+
+#2.统计前一天成功下载激活的用户数
+def get_active_users():
+    status = 1
+    sql = """
+            select count(user_id)as assistCounter 
+            from asteroid.share_assistance where status ='%s' 
+            and modify_time >= '%s' and modify_time < '%s'
+           """ % (status, yesterday_format, today)
+    asteroid_query.Query(sql)
+    for row in asteroid_query.record:
+        return "成功下载激活的用户数:%s" % row["assistCounter"]
+
+#3.统计前一天分享的牛人 和 次数  type:1 昨天 0:昨天所在一周
+def get_supers(stime,endtime,type):
+    status=1
+    sql = """
+            select count(super_id) as superCounter,super_id as superId
+            from asteroid.share where status = '%s' 
+            and last_share_time >= '%s' and last_share_time < '%s' 
+            GROUP BY super_id
+         """ % (status, stime, endtime)
+    asteroid_query.Query(sql)
+
+    if type==1:
+        result = "昨天分享的牛人：<br />"
+        for row in asteroid_query.record:
+            result += "牛人id:%s,被分享次数:%s<br />" % (row["superId"], row["superCounter"])
+    else:
+        result = "本周分享的牛人：<br />"
+        for row in asteroid_query.record:
+            result += "牛人id:%s,被分享次数:%s<br />" % (row["superId"], row["superCounter"])
+    return result
+
+
+
+
+0002000700290004
+000200070029
+分享牛人
+manager/mncg/sharedUserList.jsp
+99990001
+
+
+if __name__ == "__main__":
+    get_supers()
+
+
+

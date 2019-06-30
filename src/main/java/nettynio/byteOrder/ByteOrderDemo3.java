@@ -21,18 +21,14 @@ public class ByteOrderDemo3 {
         buffer.rewind();
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         buffer.asCharBuffer().put("abcd");
+        System.out.println(buffer);
         System.out.println(Arrays.toString(buffer.array()));
         System.out.println("-------------------------------");
 
-        buffer.flip();
-        //System.out.println("\t" + new String(buffer.array()));
+        System.out.println(buffer);
 
-        buffer.compact();
-        System.out.println("\t" + buffer.getChar());
-        System.out.println("after compact:" + buffer);
-        System.out.println("\t" + buffer.getChar());
-        System.out.println("\t" + buffer.getChar());
-        System.out.println("\t" + buffer.getChar());
+        System.out.println("\t" + new String(buffer.array()));
+
 
 
 /*

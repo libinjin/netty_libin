@@ -16,9 +16,9 @@ public class ByteOrderDemo2 {
         ByteOrder order2 = buffer.order(); //
         System.out.println("当前order2="+order2);
 
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer newOrder = buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        System.out.println("当前order="+order);
+        System.out.println("当前order="+newOrder.order());
 
         buffer.putShort(0, (short) 1);
         buffer.get(0);

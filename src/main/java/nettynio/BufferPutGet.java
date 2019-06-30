@@ -21,14 +21,18 @@ public class BufferPutGet {
         //分配一个HeapByteBuffer的实例，其底层是byte数组
         ByteBuffer byteBuffer = ByteBuffer.allocate(50);
 
+        System.out.println("1:"+byteBuffer);
         byte[] bytes = "你好".getBytes("utf-8");
         byteBuffer.putDouble(2.35);
         byteBuffer.putInt(bytes.length);
         byteBuffer.put(bytes);
         byteBuffer.putDouble(3.35);
 
+        System.out.println("1:"+byteBuffer);
 
         byteBuffer.flip();
+        System.out.println("1:"+byteBuffer);
+
         double d = byteBuffer.getDouble();
         System.out.println(d);
         byte[] temp = new byte[byteBuffer.getInt()];

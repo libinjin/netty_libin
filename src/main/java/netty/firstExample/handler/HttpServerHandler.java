@@ -21,6 +21,7 @@ import java.net.URI;
  * outbound是出去，是对返回的处理
  */
 public class HttpServerHandler extends SimpleChannelInboundHandler<HttpObject> {
+
     //读取客户端发送过来的信息，并且响应给客户端
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpObject msg) throws Exception {

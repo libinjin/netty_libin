@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
  */
 public class MappedByte {
     public static void main(String[] args) throws IOException {
+
         RandomAccessFile accessFile = new RandomAccessFile("src/main/resources/file/aa.txt","rw");
         FileChannel channel = accessFile.getChannel();
 
