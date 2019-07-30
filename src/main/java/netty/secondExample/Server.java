@@ -17,6 +17,7 @@ public class Server {
         /**
          * EventLoopGroup仅完成了参数的赋值
          *
+         * bossGroup用于转发
          */
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();

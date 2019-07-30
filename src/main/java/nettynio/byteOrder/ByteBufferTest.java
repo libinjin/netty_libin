@@ -11,13 +11,11 @@ public class ByteBufferTest {
 
         lock.tryLock();
 
-
         ByteBuffer directBuffer = ByteBuffer.allocateDirect(100);
 
         System.out.println(directBuffer.isDirect());
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(10);
-
 
         byteBuffer.asReadOnlyBuffer();
 
