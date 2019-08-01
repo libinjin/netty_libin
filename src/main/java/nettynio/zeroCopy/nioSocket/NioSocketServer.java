@@ -35,9 +35,11 @@ public class NioSocketServer {
         FileChannel fileChannel = fos.getChannel();
 
         while(true){
-            //
-            selector.select();
+
+            selector.select();//看那个channel有数据，就绑定该channel到key上
+
             Set<SelectionKey> set = selector.selectedKeys();
+
             for (SelectionKey selectionKey : set ) {
                 SocketChannel client;
                 if(selectionKey.isAcceptable()){

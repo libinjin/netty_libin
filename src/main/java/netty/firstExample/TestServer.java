@@ -42,8 +42,12 @@ public class TestServer {
 
             System.out.println("启动服务器");
             /**
-             * ServerBootstrap是一个启动服务端的类
+             * ServerBootstrap是一个启动服务端的类,
+             *
+             * 它是BootStrap启动类的子类
+             *
              * extends了服务管道ServerChannel
+             *
              * 封装了，使得可以轻松的启动服务端的代码
              */
             ServerBootstrap serverBootstrap = new ServerBootstrap();

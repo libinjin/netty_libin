@@ -12,17 +12,20 @@ import netty.secondExample.init.MyInitializer;
 
 public class Server {
     public static void main(String[] args) {
-        //workGroup是真正的完成处理的类
-        //事件循环组，不断等待事件发生的组
         /**
+         * 事件循环组，不断等待事件发生的组
          * EventLoopGroup仅完成了参数的赋值
          *
          * bossGroup用于转发
+         *
+         * workGroup是真正的完成处理的类
+         * EventLoopGroup底层就是一个死循环
          */
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup,workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
+        //group()方法就是完成了成员变量的赋值
+        serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new MyInitializer());
         try {
             System.out.println("启动服务器");
